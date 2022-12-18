@@ -23,10 +23,15 @@ module.exports.createCard = (req, res) => {
 
 module.exports.removeCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
+    .orFail(new Error('notFoundId'))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.message === 'notFoundId') {
         res.status(NOT_FOUND_ERR_STATUS).send({ message: 'Запрашиваемая карточка не найдена' });
+        return;
+      }
+      if (err.name === 'CastError') {
+        res.status(VALIDATION_ERR_STATUS).send({ message: 'Переданы некорректные данные о карточке' });
         return;
       }
       res.status(SERVER_ERR_STATUS).send({ message: 'На сервере произошла ошибка' });
@@ -35,10 +40,15 @@ module.exports.removeCard = (req, res) => {
 
 module.exports.putLike = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
+    .orFail(new Error('notFoundId'))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.message === 'notFoundId') {
         res.status(NOT_FOUND_ERR_STATUS).send({ message: 'Запрашиваемая карточка не найдена' });
+        return;
+      }
+      if (err.name === 'CastError') {
+        res.status(VALIDATION_ERR_STATUS).send({ message: 'Переданы некорректные данные о карточке' });
         return;
       }
       res.status(SERVER_ERR_STATUS).send({ message: 'На сервере произошла ошибка' });
@@ -47,10 +57,15 @@ module.exports.putLike = (req, res) => {
 
 module.exports.deleteLike = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
+    .orFail(new Error('notFoundId'))
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.message === 'notFoundId') {
         res.status(NOT_FOUND_ERR_STATUS).send({ message: 'Запрашиваемая карточка не найдена' });
+        return;
+      }
+      if (err.name === 'CastError') {
+        res.status(VALIDATION_ERR_STATUS).send({ message: 'Переданы некорректные данные о карточке' });
         return;
       }
       res.status(SERVER_ERR_STATUS).send({ message: 'На сервере произошла ошибка' });
