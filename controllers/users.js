@@ -1,5 +1,5 @@
 const User = require('../models/user');
-const { CAST_ERR_STATUS, VALIDATION_ERR_STATUS, SERVER_ERR_STATUS } = require('../utils/constants');
+const { NOT_FOUND_ERR_STATUS, VALIDATION_ERR_STATUS, SERVER_ERR_STATUS } = require('../utils/constants');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -12,8 +12,12 @@ module.exports.getUser = (req, res) => {
     .orFail(new Error('notFoundId'))
     .then((user) => res.send({ data: user }))
     .catch((err) => {
+      if (err.message === 'notFoundId') {
+        res.status(NOT_FOUND_ERR_STATUS).send({ message: 'Запрашиваемый пользователь не найден' });
+        return;
+      }
       if (err.name === 'CastError') {
-        res.status(VALIDATION_ERR_STATUS).send({ message: 'Запрашиваемый пользователь не найден' });
+        res.status(VALIDATION_ERR_STATUS).send({ message: 'Переданы некорректные данные о пользователе' });
         return;
       }
       res.status(SERVER_ERR_STATUS).send({ message: 'На сервере произошла ошибка' });
@@ -43,7 +47,7 @@ module.exports.patchUserAvatar = (req, res) => {
         return;
       }
       if (err.name === 'CastError') {
-        res.status(CAST_ERR_STATUS).send({ message: 'Запрашиваемый пользователь не найден' });
+        res.status(NOT_FOUND_ERR_STATUS).send({ message: 'Запрашиваемый пользователь не найден' });
         return;
       }
       res.status(SERVER_ERR_STATUS).send({ message: 'На сервере произошла ошибка' });
@@ -60,7 +64,7 @@ module.exports.patchUserInfo = (req, res) => {
         return;
       }
       if (err.name === 'CastError') {
-        res.status(CAST_ERR_STATUS).send({ message: 'Запрашиваемый пользователь не найден' });
+        res.status(NOT_FOUND_ERR_STATUS).send({ message: 'Запрашиваемый пользователь не найден' });
         return;
       }
       res.status(SERVER_ERR_STATUS).send({ message: 'На сервере произошла ошибка' });

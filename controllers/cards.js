@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const { SERVER_ERR_STATUS, VALIDATION_ERR_STATUS, CAST_ERR_STATUS } = require('../utils/constants');
+const { SERVER_ERR_STATUS, VALIDATION_ERR_STATUS, NOT_FOUND_ERR_STATUS } = require('../utils/constants');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
@@ -26,7 +26,7 @@ module.exports.removeCard = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(CAST_ERR_STATUS).send({ message: 'Запрашиваемая карточка не найдена' });
+        res.status(NOT_FOUND_ERR_STATUS).send({ message: 'Запрашиваемая карточка не найдена' });
         return;
       }
       res.status(SERVER_ERR_STATUS).send({ message: 'На сервере произошла ошибка' });
@@ -38,7 +38,7 @@ module.exports.putLike = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(CAST_ERR_STATUS).send({ message: 'Запрашиваемая карточка не найдена' });
+        res.status(NOT_FOUND_ERR_STATUS).send({ message: 'Запрашиваемая карточка не найдена' });
         return;
       }
       res.status(SERVER_ERR_STATUS).send({ message: 'На сервере произошла ошибка' });
@@ -50,7 +50,7 @@ module.exports.deleteLike = (req, res) => {
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(CAST_ERR_STATUS).send({ message: 'Запрашиваемая карточка не найдена' });
+        res.status(NOT_FOUND_ERR_STATUS).send({ message: 'Запрашиваемая карточка не найдена' });
         return;
       }
       res.status(SERVER_ERR_STATUS).send({ message: 'На сервере произошла ошибка' });
