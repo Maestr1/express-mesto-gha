@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { NOT_FOUND_ERR_STATUS } = require('./utils/constants');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -17,12 +18,18 @@ app.use((req, res, next) => {
   req.user = {
     _id: '639df52371e4e7db00bdd531',
   };
-
   next();
 });
 
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
+
+app.use((req, res, next) => {
+  if (res.status(404)) {
+    res.status(NOT_FOUND_ERR_STATUS).send({ message: 'Не правильный путь' });
+  }
+  next();
+});
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
