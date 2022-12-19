@@ -1,12 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const { NOT_FOUND_ERR_STATUS } = require('./utils/constants');
 
 const { PORT = 3000 } = process.env;
 const app = express();
 
-app.use(bodyParser.json());
+app.use(express.json());
 
 mongoose.set('runValidators', true);
 
@@ -25,9 +24,7 @@ app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
 app.use((req, res, next) => {
-  if (res.status(404)) {
-    res.status(NOT_FOUND_ERR_STATUS).send({ message: 'Не правильный путь' });
-  }
+  res.status(NOT_FOUND_ERR_STATUS).send({ message: 'Не правильный путь' });
   next();
 });
 

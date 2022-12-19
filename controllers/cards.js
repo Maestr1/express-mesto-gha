@@ -3,8 +3,10 @@ const { SERVER_ERR_STATUS, VALIDATION_ERR_STATUS, NOT_FOUND_ERR_STATUS } = requi
 
 module.exports.getCards = (req, res) => {
   Card.find({})
+    .populate('owner')
+    .populate('likes')
     .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(SERVER_ERR_STATUS).send({ message: 'На сервере произошла ошибка' }));
+    .catch((err) => res.status(SERVER_ERR_STATUS).send({ message: `На сервере произошла ошибка ${err.name}` }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -41,6 +43,8 @@ module.exports.removeCard = (req, res) => {
 module.exports.putLike = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: req.user._id } }, { new: true })
     .orFail(new Error('notFoundId'))
+    .populate('owner')
+    .populate('likes')
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.message === 'notFoundId') {
@@ -58,6 +62,8 @@ module.exports.putLike = (req, res) => {
 module.exports.deleteLike = (req, res) => {
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: req.user._id } }, { new: true })
     .orFail(new Error('notFoundId'))
+    .populate('owner')
+    .populate('likes')
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.message === 'notFoundId') {
