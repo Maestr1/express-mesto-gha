@@ -15,6 +15,21 @@ module.exports.getUsers = (req, res) => {
       .send({ message: 'На сервере произошла ошибка' }));
 };
 
+module.exports.getMe = (req, res) => {
+  User.findById(req.body._id)
+    .orFail(new Error('notFoundId'))
+    .then((user) => res.send({ data: user }))
+    .catch((err) => {
+      if (err.message === 'notFoundId') {
+        res.status(NOT_FOUND_ERR_STATUS)
+          .send({ message: 'Запрашиваемый пользователь не найден' });
+        return;
+      }
+      res.status(SERVER_ERR_STATUS)
+        .send({ message: 'На сервере произошла ошибка' });
+    });
+};
+
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
     .orFail(new Error('notFoundId'))
@@ -120,7 +135,7 @@ module.exports.login = (req, res) => {
   } = req.body;
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '3600' });
+      const token = jwt.sign({ _id: user._id }, 'secret-key', { expiresIn: '7d' });
       res.send({ token });
     })
     .catch((err) => {

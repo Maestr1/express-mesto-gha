@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const auth = require('./middlewares/auth');
 const { NOT_FOUND_ERR_STATUS } = require('./utils/constants');
 const { createUser, login } = require('./controllers/users');
 
@@ -14,15 +15,10 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
 });
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '639df52371e4e7db00bdd531',
-  };
-  next();
-});
-
 app.use('/signin', login);
 app.use('/signup', createUser);
+
+app.use('/', auth);
 
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
