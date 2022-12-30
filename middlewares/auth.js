@@ -2,11 +2,11 @@ const jwt = require('jsonwebtoken');
 
 const { LOGIN_ERR_STATUS } = require('../utils/constants');
 
-const handleAuthError = (res) => {
+function handleAuthError(res) {
   res
     .status(LOGIN_ERR_STATUS)
     .send({ message: 'Необходима авторизация' });
-};
+}
 
 // eslint-disable-next-line consistent-return
 module.exports = (req, res, next) => {

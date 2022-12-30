@@ -8,6 +8,21 @@ const {
   LOGIN_ERR_STATUS,
 } = require('../utils/constants');
 
+function updateUserInfoErrorHandler(res, err) {
+  if (err.name === 'ValidationError') {
+    res.status(VALIDATION_ERR_STATUS)
+      .send({ message: 'Переданы некорректные данные о пользователе' });
+    return;
+  }
+  if (err.name === 'CastError') {
+    res.status(NOT_FOUND_ERR_STATUS)
+      .send({ message: 'Запрашиваемый пользователь не найден' });
+    return;
+  }
+  res.status(SERVER_ERR_STATUS)
+    .send({ message: 'На сервере произошла ошибка' });
+}
+
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
@@ -87,18 +102,7 @@ module.exports.patchUserAvatar = (req, res) => {
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(VALIDATION_ERR_STATUS)
-          .send({ message: 'Переданы некорректные данные о пользователе' });
-        return;
-      }
-      if (err.name === 'CastError') {
-        res.status(NOT_FOUND_ERR_STATUS)
-          .send({ message: 'Запрашиваемый пользователь не найден' });
-        return;
-      }
-      res.status(SERVER_ERR_STATUS)
-        .send({ message: 'На сервере произошла ошибка' });
+      updateUserInfoErrorHandler(res, err);
     });
 };
 
@@ -113,18 +117,7 @@ module.exports.patchUserInfo = (req, res) => {
   }, { new: true })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(VALIDATION_ERR_STATUS)
-          .send({ message: 'Переданы некорректные данные о пользователе' });
-        return;
-      }
-      if (err.name === 'CastError') {
-        res.status(NOT_FOUND_ERR_STATUS)
-          .send({ message: 'Запрашиваемый пользователь не найден' });
-        return;
-      }
-      res.status(SERVER_ERR_STATUS)
-        .send({ message: 'На сервере произошла ошибка' });
+      updateUserInfoErrorHandler(res, err);
     });
 };
 
