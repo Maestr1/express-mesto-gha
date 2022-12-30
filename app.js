@@ -1,8 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const { errors } = require('celebrate');
 const auth = require('./middlewares/auth');
+const errorHandler = require('./middlewares/error-handler');
 const { NOT_FOUND_ERR_STATUS } = require('./utils/constants');
-const { createUser, login } = require('./controllers/users');
+const {
+  createUser,
+  login,
+} = require('./controllers/users');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -24,9 +29,13 @@ app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
 app.use((req, res, next) => {
-  res.status(NOT_FOUND_ERR_STATUS).send({ message: 'Не правильный путь' });
+  res.status(NOT_FOUND_ERR_STATUS)
+    .send({ message: 'Не правильный путь' });
   next();
 });
+
+app.use(errors());
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
