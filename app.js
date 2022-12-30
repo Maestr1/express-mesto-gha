@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { NOT_FOUND_ERR_STATUS } = require('./utils/constants');
+const { createUser, login } = require('./controllers/users');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -19,6 +20,9 @@ app.use((req, res, next) => {
   };
   next();
 });
+
+app.use('/signin', login);
+app.use('/signup', createUser);
 
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
