@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const validator = require('validator');
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found');
 const ValidationError = require('../errors/validation');
@@ -61,7 +62,11 @@ module.exports.createUser = (req, res, next) => {
         email,
         password: hash,
       })
-        .then((user) => res.send({ data: user }))
+        .then((user) => {
+          user = user.toObject();
+          delete user.password;
+          res.send({ data: user });
+        })
         .catch((err) => {
           if (err.name === 'ValidationError') {
             next(new ValidationError('Переданы некорректные данные о пользователе'));
@@ -103,6 +108,10 @@ module.exports.login = (req, res, next) => {
     email,
     password,
   } = req.body;
+  if (!validator.isEmail(email)) {
+    next(new ValidationError('Введен некорректный Email'));
+    return;
+  }
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'secret-key', { expiresIn: '7d' });
