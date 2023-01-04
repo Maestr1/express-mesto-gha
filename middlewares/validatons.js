@@ -1,8 +1,10 @@
 const { celebrate } = require('celebrate');
 const Joi = require('joi');
-
-const regExpURL = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/;
-const regExpEmail = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const mongoose = require('mongoose');
+const {
+  isEmail,
+  isURL,
+} = require('validator');
 
 module.exports.validateCardBody = celebrate({
   body: Joi.object()
@@ -18,10 +20,14 @@ module.exports.validateCardBody = celebrate({
         }),
       link: Joi.string()
         .required()
-        .pattern(regExpURL)
+        .custom((value, helpers) => {
+          if (isURL(value)) {
+            return value;
+          }
+          return helpers.message('Введена некорректная ссылка');
+        })
         .messages({
           'any.required': 'Необходимо ввести ссылку на изображение',
-          'string.pattern.base': 'Введена некорректная ссылка',
         }),
     }),
 });
@@ -44,13 +50,21 @@ module.exports.validateSignUp = celebrate({
           'string.max': 'В описании не должно быть более 30 символов',
         }),
       avatar: Joi.string()
-        .pattern(regExpURL)
-        .message('Передана некорректная ссылка на аватар'),
+        .custom((value, helpers) => {
+          if (isURL(value)) {
+            return value;
+          }
+          return helpers.message('Введена некорректная ссылка на аватар');
+        }),
       email: Joi.string()
         .required()
-        .pattern(regExpEmail)
+        .custom((value, helpers) => {
+          if (isEmail(value)) {
+            return value;
+          }
+          return helpers.message('Введен некорректный Email');
+        })
         .messages({
-          'string.pattern.base': 'Введен некорректный Email',
           'any.required': 'Необходимо ввести Email',
         }),
       password: Joi.string()
@@ -68,9 +82,13 @@ module.exports.validateSignIn = celebrate({
     .keys({
       email: Joi.string()
         .required()
-        .pattern(regExpEmail)
+        .custom((value, helpers) => {
+          if (isEmail(value)) {
+            return value;
+          }
+          return helpers.message('Введен некорректный Email');
+        })
         .messages({
-          'string.pattern.base': 'Введен некорректный Email',
           'any.required': 'Необходимо ввести Email',
         }),
       password: Joi.string()
@@ -82,7 +100,7 @@ module.exports.validateSignIn = celebrate({
     }),
 });
 
-module.exports.validatePatchUser = celebrate({
+module.exports.validatePatchUserInfo = celebrate({
   body: Joi.object()
     .keys({
       name: Joi.string()
@@ -100,8 +118,26 @@ module.exports.validatePatchUser = celebrate({
           'string.max': 'В описании не должно быть более 30 символов',
         }),
       avatar: Joi.string()
-        .pattern(regExpURL)
-        .message('Передана некорректная ссылка на аватар'),
+        .custom((value, helpers) => {
+          if (isURL(value)) {
+            return value;
+          }
+          return helpers.message('Введена некорректная ссылка на аватар');
+        }),
+    }),
+});
+
+module.exports.validatePatchUserAvatar = celebrate({
+  body: Joi.object()
+    .keys({
+      avatar: Joi.string()
+        .required()
+        .custom((value, helpers) => {
+          if (isURL(value)) {
+            return value;
+          }
+          return helpers.message('Введена некорректная ссылка на аватар');
+        }),
     }),
 });
 
@@ -110,12 +146,31 @@ module.exports.validationGetUser = celebrate({
     .keys({
       userId: Joi.string()
         .required()
-        .min(24)
-        .max(24)
+        .custom((value, helpers) => {
+          if (mongoose.Types.ObjectId.isValid(value)) {
+            return value;
+          }
+          return helpers.message('Передан некорректный ID пользователя');
+        })
         .messages({
-          'string.min': 'Переданы некорректные данные о пользователе',
-          'string.max': 'Переданы некорректные данные о пользователе',
           'any.required': 'Переданы некорректные данные о пользователе',
+        }),
+    }),
+});
+
+module.exports.validationCardId = celebrate({
+  params: Joi.object()
+    .keys({
+      cardId: Joi.string()
+        .required()
+        .custom((value, helpers) => {
+          if (mongoose.Types.ObjectId.isValid(value)) {
+            return value;
+          }
+          return helpers.message('Передан некорректный ID карточки');
+        })
+        .messages({
+          'any.required': 'Не переданы данные о карточке',
         }),
     }),
 });

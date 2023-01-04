@@ -35,9 +35,11 @@ module.exports.removeCard = (req, res, next) => {
     .orFail(() => {
       next(new NotFoundError('Запрашиваемая карточка не найдена'));
     })
+    // eslint-disable-next-line consistent-return
     .then((card) => {
       if (!card.owner.equals(req.user._id)) {
         next(new ForbiddenError('Нет прав для удаления этой карточки'));
+        return;
       }
       Card.findByIdAndRemove(req.params.cardId)
         .then(() => res.send({ data: card }));
@@ -46,7 +48,6 @@ module.exports.removeCard = (req, res, next) => {
       if (err.name === 'CastError') {
         next(new ValidationError('Переданы некорректные данные о карточке'));
       }
-      next();
     });
 };
 
