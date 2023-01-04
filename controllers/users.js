@@ -23,7 +23,7 @@ module.exports.getUsers = (req, res, next) => {
 };
 
 module.exports.getMe = (req, res, next) => {
-  User.findById(req.body._id)
+  User.findById(req.user._id)
     .orFail(() => {
       next(new NotFoundError('Запрашиваемый пользователь не найден'));
     })
@@ -63,9 +63,9 @@ module.exports.createUser = (req, res, next) => {
         password: hash,
       })
         .then((user) => {
-          user = user.toObject();
-          delete user.password;
-          res.send({ data: user });
+          const userObject = user.toObject();
+          delete userObject.password;
+          res.send({ data: userObject });
         })
         .catch((err) => {
           if (err.name === 'ValidationError') {
@@ -112,7 +112,7 @@ module.exports.login = (req, res, next) => {
     next(new ValidationError('Введен некорректный Email'));
     return;
   }
-  return User.findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'secret-key', { expiresIn: '7d' });
       res.send({ token });

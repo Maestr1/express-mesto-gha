@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 const auth = require('./middlewares/auth');
 const errorHandler = require('./middlewares/error-handler');
-const { validateSignUp } = require('./middlewares/validatons');
+const { validateSignUp, validateSignIn } = require('./middlewares/validatons');
 const { NOT_FOUND_ERR_STATUS } = require('./utils/constants');
 const {
   createUser,
@@ -21,7 +21,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
 });
 
-app.use('/signin', login);
+app.use('/signin', validateSignIn, login);
 app.use('/signup', validateSignUp, createUser);
 
 app.use('/', auth);
